@@ -1,0 +1,35 @@
+{
+  "name": "obsidian-inkmagix",
+  "version": "0.1.0",
+  "description": "Turn photos and images into Obsidian notes (with Mermaid diagrams) or draw.io diagrams using Claude.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "obsidian",
+    "claude",
+    "ocr",
+    "diagram",
+    "mermaid",
+    "drawio"
+  ],
+  "author": "yaman",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "builtin-modules": "^4.0.0",
+    "esbuild": "^0.24.0",
+    "jsdom": "^25.0.1",
+    "obsidian": "latest",
+    "tslib": "^2.6.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "inkmagix",
+  "name": "InkMagix",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Turn photos and images (handwriting, whiteboards, diagrams) into notes with Mermaid diagrams or draw.io files using Claude.",
+  "author": "yaman",
+  "isDesktopOnly": false
+}

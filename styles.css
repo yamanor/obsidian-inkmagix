@@ -1,0 +1,101 @@
+.inkmagix-modal {
+	width: min(560px, 95vw);
+}
+
+.inkmagix-add {
+	display: flex;
+	gap: var(--size-4-2);
+	margin-bottom: var(--size-4-3);
+}
+
+.inkmagix-thumbs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	margin-bottom: var(--size-4-3);
+}
+
+.inkmagix-empty {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.inkmagix-thumb {
+	width: 120px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	padding: var(--size-4-1);
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-1);
+}
+
+.inkmagix-thumb img {
+	width: 100%;
+	height: 90px;
+	object-fit: cover;
+	border-radius: var(--radius-s);
+}
+
+.inkmagix-thumb-name {
+	font-size: var(--font-ui-smaller);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.inkmagix-thumb-tools {
+	display: flex;
+	justify-content: space-between;
+}
+
+.inkmagix-thumb-tools button {
+	padding: 0 var(--size-4-2);
+	height: auto;
+}
+
+.inkmagix-stacked {
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--size-4-2);
+}
+
+.inkmagix-wide {
+	width: 100%;
+}
+
+.inkmagix-busy {
+	opacity: 0.6;
+}
+
+.inkmagix-status {
+	min-height: 1.5em;
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	flex-wrap: wrap;
+}
+
+.inkmagix-status.mod-warning {
+	color: var(--text-error);
+}
+
+.inkmagix-webcam-modal {
+	width: min(900px, 95vw);
+}
+
+.inkmagix-webcam-stage video,
+.inkmagix-webcam-stage img {
+	width: 100%;
+	max-height: 65vh;
+	object-fit: contain;
+	background: #000;
+	border-radius: var(--radius-m);
+}
+
+.inkmagix-setting-note {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
