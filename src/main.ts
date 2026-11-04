@@ -8,7 +8,7 @@ export default class InkMagixPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		this.addRibbonIcon("image-plus", "InkMagix: convert images to note", () => this.open(null));
+		this.addRibbonIcon("image-plus", "Convert images to note", () => this.open(null));
 
 		this.addCommand({
 			id: "convert-images",

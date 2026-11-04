@@ -1,7 +1,8 @@
 {
   "name": "obsidian-inkmagix",
   "version": "0.1.0",
-  "description": "Turn photos and images into Obsidian notes (with Mermaid diagrams) or draw.io diagrams using Claude.",
+  "description": "Convert photos of handwriting, whiteboards and diagrams into Obsidian notes with Mermaid diagrams or draw.io files using Claude.",
+  "private": true,
   "main": "main.js",
   "type": "module",
   "scripts": {
@@ -17,8 +18,16 @@
     "mermaid",
     "drawio"
   ],
-  "author": "yaman",
+  "author": "yaman (https://github.com/yamanor)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yamanor/obsidian-inkmagix.git"
+  },
+  "homepage": "https://github.com/yamanor/obsidian-inkmagix#readme",
+  "bugs": {
+    "url": "https://github.com/yamanor/obsidian-inkmagix/issues"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "builtin-modules": "^4.0.0",

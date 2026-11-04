@@ -1,9 +1,24 @@
-# InkMagix - Obsidian Image to Text/Diagram
+# InkMagix: image to note and diagram converter for Obsidian
 
 Turn photos and images (handwritten notes, whiteboards, printed pages, screenshots, sketches, diagrams) into [Obsidian](https://obsidian.md) content using Claude:
 
 - **Note with Mermaid diagrams**: a Markdown note. Any diagrams in the image are rebuilt as `mermaid` blocks.
-- **draw.io diagram**: an editable `.drawio` file. Open it with the Diagrams.net Obsidian plugin or the draw.io desktop app.
+- **draw.io diagram**: an editable `.drawio` file. Obsidian can't open `.drawio` files by itself: install a draw.io community plugin (such as Diagrams.net or draw.io editor) or open the file in the draw.io desktop app.
+
+## Requirements, network use and costs
+
+- **Anthropic account and API key required.** InkMagix uses Anthropic's Claude models to read your images. Create an API key at [console.anthropic.com](https://console.anthropic.com).
+- **Paid usage.** Anthropic bills API usage to your Anthropic account. InkMagix itself is free, but each conversion costs a small amount (shown after every conversion). See [Anthropic's pricing](https://www.anthropic.com/pricing).
+- **Network use.** When you click **Convert**, the selected images and your instructions are sent to the Anthropic API (`api.anthropic.com`). This is the only network request the plugin makes, and it is needed because the conversion runs on Claude, not on your device.
+- **Privacy.** Nothing else from your vault is sent. InkMagix collects no telemetry or analytics. Anthropic's handling of API data is described in its [privacy policy](https://www.anthropic.com/legal/privacy).
+
+## Installation
+
+**From Community plugins (once published):** open **Settings → Community plugins → Browse**, search for "InkMagix", install and enable it.
+
+**Manually:** download `main.js`, `manifest.json` and `styles.css` from the [latest release](https://github.com/yamanor/obsidian-inkmagix/releases/latest) into `<vault>/.obsidian/plugins/inkmagix/`, then enable InkMagix under **Settings → Community plugins**.
+
+Then open **Settings → InkMagix** and paste your Anthropic API key.
 
 ## Usage
 
@@ -16,7 +31,7 @@ Open the convert dialog from the ribbon icon or from the command palette. The co
 In the dialog:
 
 1. **Choose images…** or **Take picture**. On mobile, Take picture opens the native camera. On desktop, it shows a webcam preview.
-2. Add as many images as you need, up to 20. They are combined in the order shown, and you can reorder them with ← / →.
+2. Add as many images as you need, up to 10. They are combined in the order shown, and you can reorder them with ← / →.
 3. Pick the output and optionally give a title. Instructions come from the "Default instructions" setting.
 4. Click **Convert**. The new file opens when it's done. The notice also shows the tokens used and the approximate cost.
 
@@ -53,10 +68,6 @@ Images are processed on the device before upload:
 
 HEIC photos can't be decoded on desktop. Export them as JPEG or PNG first. The mobile camera already produces JPEG.
 
-## Privacy
-
-Images and instructions are sent to the Anthropic API. See Anthropic's privacy policy. Nothing else from your vault is sent.
-
 ## Development
 
 ```bash
@@ -67,3 +78,17 @@ npm test        # unit tests (vitest)
 ```
 
 To try it out, copy or symlink `main.js`, `manifest.json` and `styles.css` into `<vault>/.obsidian/plugins/inkmagix/`, then enable the plugin.
+
+### Releasing
+
+Bump `version` in `manifest.json`, `package.json` and `versions.json`, commit, then push a tag with exactly that version (no `v` prefix):
+
+```bash
+git tag 0.1.1 && git push origin 0.1.1
+```
+
+The GitHub Actions workflow builds, tests and publishes a release with `main.js`, `manifest.json` and `styles.css` attached.
+
+## License
+
+[MIT](LICENSE)
