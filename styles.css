@@ -95,7 +95,3 @@
 	border-radius: var(--radius-m);
 }
 
-.inkmagix-setting-note {
-	color: var(--text-muted);
-	font-size: var(--font-ui-small);
-}

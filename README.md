@@ -1,8 +1,8 @@
-# InkMagix
+# InkMagix - Obsidian Image to Text/Diagram
 
-Turn photos and images (handwritten notes, whiteboards, printed pages, screenshots, sketches, diagrams) into Obsidian content using Claude:
+Turn photos and images (handwritten notes, whiteboards, printed pages, screenshots, sketches, diagrams) into [Obsidian](https://obsidian.md) content using Claude:
 
-- **Note with Mermaid diagrams**: a Markdown note. Any diagrams in the image are rebuilt as ```` ```mermaid ```` blocks.
+- **Note with Mermaid diagrams**: a Markdown note. Any diagrams in the image are rebuilt as `mermaid` blocks.
 - **draw.io diagram**: an editable `.drawio` file. Open it with the Diagrams.net Obsidian plugin or the draw.io desktop app.
 
 ## Usage
@@ -24,18 +24,21 @@ If a generated Mermaid block or the draw.io XML fails validation, InkMagix sends
 
 ## Settings
 
-| Setting | Default | Notes |
-|---|---|---|
-| Anthropic API key | — | Stored in plain text in `.obsidian/plugins/inkmagix/data.json`. |
-| Model | Claude Opus 5.5 | Sonnet 5.5 and Haiku 5.5 are cheaper. A custom model ID is also supported. |
-| Effort | High | Higher effort is more accurate on messy handwriting and complex diagrams. |
-| Note folder | `InkMagix` | Created automatically if it doesn't exist. |
-| Enable draw.io output | On | Off hides the draw.io option, so every conversion creates a Mermaid note. |
-| Default diagram format | Mermaid | Shown only while draw.io output is enabled. |
-| Keep original photo | Off | When on, the original image is saved and embedded in a collapsed callout. |
-| Max output tokens | 50000 | |
-| Max image size | 2576 px | Size of the image's long edge after downscaling. |
-| Default instructions | — | Added to every conversion. |
+
+| Setting                | Default         | Notes                                                                      |
+| ---------------------- | --------------- | -------------------------------------------------------------------------- |
+| Anthropic API key      | —               | Saved in Obsidian's secret storage as `inkmagix-anthropic-api-key` (local to this device and vault, not synced). |
+| Model                  | Claude Opus 5.5 | Sonnet 5.5 and Haiku 5.5 are cheaper. A custom model ID is also supported. |
+| Effort                 | High            | Higher effort is more accurate on messy handwriting and complex diagrams.  |
+| Note folder            | `InkMagix`      | Created automatically if it doesn't exist.                                 |
+| Enable draw.io output  | On              | Off hides the draw.io option, so every conversion creates a Mermaid note.  |
+| Default diagram format | Mermaid         | Shown only while draw.io output is enabled.                                |
+| Add properties         | Off             | Adds `created`, `source` and `model` properties to new notes.              |
+| Keep original photo    | Off             | When on, the original image is saved and embedded in a collapsed callout.  |
+| Max output tokens      | 50000           |                                                                            |
+| Max image size         | 2576 px         | Size of the image's long edge after downscaling.                           |
+| Default instructions   | —               | Added to every conversion.                                                 |
+
 
 ## Image size
 

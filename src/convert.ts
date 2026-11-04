@@ -3,7 +3,7 @@ import type { BetaMessageParam } from "@anthropic-ai/sdk/resources/beta/messages
 import { ClaudeClient, ConversionError, Progress } from "./claude";
 import { InputImage, PreparedImage, extensionFor, prepareImage } from "./image";
 import { repairInstruction, systemPrompt, userInstruction } from "./prompts";
-import { DiagramFormat, InkMagixSettings, attachmentsFolderOf } from "./settings";
+import { API_KEY_SECRET_ID, DiagramFormat, InkMagixSettings, attachmentsFolderOf } from "./settings";
 import {
 	estimateCost,
 	extractDrawioXml,
@@ -27,7 +27,7 @@ export interface ConvertResult {
 
 /** Request payload limit is 32 MB; keep total image data well under it. */
 const MAX_TOTAL_BASE64 = 28_000_000;
-export const MAX_IMAGES = 20;
+export const MAX_IMAGES = 10;
 
 export async function convertImages(
 	app: App,
@@ -39,7 +39,9 @@ export async function convertImages(
 ): Promise<ConvertResult> {
 	if (images.length === 0) throw new ConversionError("Add at least one image.");
 	if (images.length > MAX_IMAGES) throw new ConversionError(`At most ${MAX_IMAGES} images per conversion.`);
-	const client = new ClaudeClient(settings);
+	const apiKey = app.secretStorage.getSecret(API_KEY_SECRET_ID)?.trim();
+	if (!apiKey) throw new ConversionError("Set your Anthropic API key in InkMagix settings first.");
+	const client = new ClaudeClient(settings, apiKey);
 
 	// 1. Prepare images.
 	const prepared: PreparedImage[] = [];
@@ -126,15 +128,17 @@ export async function convertImages(
 		const path = uniquePath(folder, title, "drawio", (p) => !!app.vault.getAbstractFileByPath(p));
 		file = await app.vault.create(path, content.text);
 	} else {
-		const fm = [
-			"---",
-			`created: ${new Date().toISOString()}`,
-			"source: inkmagix",
-			`model: ${settings.model}`,
-			...(originals.length ? ["images:", ...originals.map((f) => `  - "[[${f.path}]]"`)] : []),
-			"---",
-			"",
-		].join("\n");
+		const fm = settings.addProperties
+			? [
+					"---",
+					`created: ${new Date().toISOString()}`,
+					"source: inkmagix",
+					`model: ${settings.model}`,
+					...(originals.length ? ["images:", ...originals.map((f) => `  - "[[${f.path}]]"`)] : []),
+					"---",
+					"",
+				].join("\n")
+			: "";
 		let body = content.text;
 		if (originals.length) {
 			body += `\n\n> [!note]- Original${originals.length > 1 ? "s" : ""}\n${originals.map((f) => `> ![[${f.path}]]`).join("\n")}\n`;

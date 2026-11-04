@@ -5,10 +5,10 @@ export type DiagramFormat = "mermaid" | "drawio";
 export type Effort = "default" | "low" | "medium" | "high" | "xhigh" | "max";
 
 export interface InkMagixSettings {
-	apiKey: string;
 	model: string;
 	effort: Effort;
 	noteFolder: string;
+	addProperties: boolean;
 	keepOriginal: boolean;
 	attachmentsFolder: string;
 	enableDrawio: boolean;
@@ -19,10 +19,10 @@ export interface InkMagixSettings {
 }
 
 export const DEFAULT_SETTINGS: InkMagixSettings = {
-	apiKey: "",
 	model: "claude-opus-5-5",
 	effort: "high",
 	noteFolder: "InkMagix",
+	addProperties: false,
 	keepOriginal: false,
 	attachmentsFolder: "",
 	enableDrawio: true,
@@ -31,6 +31,9 @@ export const DEFAULT_SETTINGS: InkMagixSettings = {
 	maxImageEdge: 2576,
 	defaultInstructions: "",
 };
+
+/** Fixed name of the secret in Obsidian's SecretStorage that holds the Anthropic API key. */
+export const API_KEY_SECRET_ID = "inkmagix-anthropic-api-key";
 
 export const MODEL_OPTIONS: Record<string, string> = {
 	"claude-opus-5-5": "Claude Opus 5.5 (recommended)",
@@ -56,26 +59,28 @@ export class InkMagixSettingTab extends PluginSettingTab {
 		const save = () => this.plugin.saveSettings();
 		containerEl.empty();
 
-		containerEl.createEl("p", {
-			cls: "inkmagix-setting-note",
-			text:
-				"Images you convert are sent to Anthropic's API for processing. " +
-				"Your API key is stored unencrypted in this vault's plugin data (data.json) — " +
-				"don't sync or share that file publicly.",
-		});
-
-		new Setting(containerEl)
+		const secrets = this.app.secretStorage;
+		const hasKey = !!secrets.getSecret(API_KEY_SECRET_ID);
+		const keySetting = new Setting(containerEl)
 			.setName("Anthropic API key")
-			.setDesc("Create one at console.anthropic.com.")
+			.setDesc("Create one at console.anthropic.com. Stored in Obsidian's secret storage, not in plugin data.")
 			.addText((t) => {
 				t.inputEl.type = "password";
-				t.setPlaceholder("sk-ant-...")
-					.setValue(s.apiKey)
-					.onChange(async (v) => {
-						s.apiKey = v.trim();
-						await save();
-					});
+				t.setPlaceholder(hasKey ? "•••••••• (saved)" : "sk-ant-...").onChange((v) => {
+					if (v.trim()) secrets.setSecret(API_KEY_SECRET_ID, v.trim());
+				});
 			});
+		if (hasKey) {
+			keySetting.addExtraButton((b) =>
+				b
+					.setIcon("trash")
+					.setTooltip("Remove saved key")
+					.onClick(() => {
+						secrets.setSecret(API_KEY_SECRET_ID, "");
+						this.display();
+					}),
+			);
+		}
 
 		const isPreset = s.model in MODEL_OPTIONS;
 		new Setting(containerEl)
@@ -159,6 +164,16 @@ export class InkMagixSettingTab extends PluginSettingTab {
 						}),
 				);
 		}
+
+		new Setting(containerEl)
+			.setName("Add properties")
+			.setDesc("Add created, source and model properties to new notes.")
+			.addToggle((t) =>
+				t.setValue(s.addProperties).onChange(async (v) => {
+					s.addProperties = v;
+					await save();
+				}),
+			);
 
 		new Setting(containerEl)
 			.setName("Keep original photo")

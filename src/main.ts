@@ -34,7 +34,13 @@ export default class InkMagixPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const data = (await this.loadData()) ?? {};
+		// The key now lives in Obsidian's SecretStorage; drop any old plain-text copy from data.json.
+		const hadPlainKey = "apiKey" in data || "apiKeySecret" in data;
+		delete data.apiKey;
+		delete data.apiKeySecret;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+		if (hadPlainKey) await this.saveSettings();
 	}
 
 	async saveSettings() {

@@ -29,10 +29,12 @@ export class ConversionError extends Error {
 export class ClaudeClient {
 	private client: Anthropic;
 
-	constructor(private settings: InkMagixSettings) {
-		if (!settings.apiKey) throw new ConversionError("Set your Anthropic API key in InkMagix settings first.");
+	constructor(
+		private settings: InkMagixSettings,
+		apiKey: string,
+	) {
 		this.client = new Anthropic({
-			apiKey: settings.apiKey,
+			apiKey,
 			// Obsidian is a browser-like (Electron / mobile WebView) environment; the key is the user's own.
 			dangerouslyAllowBrowser: true,
 			maxRetries: 2,
