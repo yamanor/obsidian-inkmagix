@@ -155,12 +155,12 @@ export async function convertImages(
 	return { file, summary };
 }
 
-function formatElapsed(ms: number): string {
+export function formatElapsed(ms: number): string {
 	const s = Math.floor(ms / 1000);
 	return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
 }
 
-function formatProgress(label: string, p: Progress, elapsedMs: number): string {
+export function formatProgress(label: string, p: Progress, elapsedMs: number): string {
 	const t = `[${formatElapsed(elapsedMs)}] `;
 	switch (p.phase) {
 		case "waiting":

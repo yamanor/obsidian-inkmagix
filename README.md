@@ -53,7 +53,7 @@ The conversion can take anywhere from a few seconds to close to a minute dependi
 
 Then open **Settings → InkMagix** and paste your Anthropic API key.
 
-## Settings
+# Settings
 
 
 | Setting                | Default         | Notes                                                                                                            |
@@ -84,27 +84,6 @@ Images are processed on the device before upload:
 
 HEIC photos can't be decoded on desktop. Export them as JPEG or PNG first. The mobile camera already produces JPEG.
 
-# Development
-
-```bash
-npm install
-npm run dev     # watch build
-npm run build   # type-check + production build → main.js
-npm test        # unit tests (vitest)
-```
-
-To try it out, copy or symlink `main.js`, `manifest.json` and `styles.css` into `<vault>/.obsidian/plugins/inkmagix/`, then enable the plugin.
-
-## Releasing
-
-Bump `version` in `manifest.json`, `package.json` and `versions.json`, commit, then push a tag with exactly that version (no `v` prefix):
-
-```bash
-git tag 0.1.1 && git push origin 0.1.1
-```
-
-The GitHub Actions workflow builds, tests and publishes a release with `main.js`, `manifest.json` and `styles.css` attached.
-
-## License
+# License
 
 [MIT](LICENSE)
