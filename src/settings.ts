@@ -49,6 +49,10 @@ export function attachmentsFolderOf(s: InkMagixSettings): string {
 }
 
 export class InkMagixSettingTab extends PluginSettingTab {
+	/** UI-only: user picked "Custom…" while the saved model is still a preset. */
+	private customModelSelected = false;
+	private customModelInput: HTMLInputElement | null = null;
+
 	constructor(app: App, private plugin: InkMagixPlugin) {
 		super(app, plugin);
 	}
@@ -82,29 +86,43 @@ export class InkMagixSettingTab extends PluginSettingTab {
 			);
 		}
 
-		const isPreset = s.model in MODEL_OPTIONS;
+		const showCustom = this.customModelSelected || !(s.model in MODEL_OPTIONS);
 		new Setting(containerEl)
 			.setName("Model")
 			.setDesc("Claude model used for conversions.")
 			.addDropdown((d) => {
 				for (const [id, label] of Object.entries(MODEL_OPTIONS)) d.addOption(id, label);
 				d.addOption(CUSTOM_MODEL, "Custom…");
-				d.setValue(isPreset ? s.model : CUSTOM_MODEL).onChange(async (v) => {
-					if (v !== CUSTOM_MODEL) s.model = v;
+				d.setValue(showCustom ? CUSTOM_MODEL : s.model).onChange(async (v) => {
+					if (v === CUSTOM_MODEL) {
+						// Keep the current model until a custom ID is typed; just reveal the field.
+						this.customModelSelected = true;
+						this.display();
+						this.customModelInput?.focus();
+						return;
+					}
+					this.customModelSelected = false;
+					s.model = v;
 					await save();
 					this.display();
 				});
 			});
-		if (!isPreset || s.model === "") {
+		this.customModelInput = null;
+		if (showCustom) {
 			new Setting(containerEl)
 				.setName("Custom model ID")
 				.setDesc("Exact model ID, e.g. claude-opus-5.")
-				.addText((t) =>
-					t.setValue(s.model).onChange(async (v) => {
-						s.model = v.trim();
-						await save();
-					}),
-				);
+				.addText((t) => {
+					this.customModelInput = t.inputEl;
+					t.setPlaceholder("claude-…")
+						.setValue(s.model)
+						.onChange(async (v) => {
+							const id = v.trim();
+							if (!id) return; // never save an empty model
+							s.model = id;
+							await save();
+						});
+				});
 		}
 
 		new Setting(containerEl)

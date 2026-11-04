@@ -5,6 +5,30 @@ Turn photos and images (handwritten notes, whiteboards, printed pages, screensho
 - **Note with Mermaid diagrams**: a Markdown note. Any diagrams in the image are rebuilt as `mermaid` blocks.
 - **draw.io diagram**: an editable `.drawio` file. Obsidian can't open `.drawio` files by itself: install a draw.io community plugin (such as Diagrams.net or draw.io editor) or open the file in the draw.io desktop app.
 
+## Example
+
+**Step 1: open InkMagix.** Click the InkMagix icon in the left ribbon. Its tooltip reads "InkMagix: convert images to note".
+
+![InkMagix ribbon icon with its tooltip](assets/step_1.png)
+
+**Step 2: choose the images and the output.** The **Convert images** dialog opens. Add images with **Choose images…** or **Take picture**, pick the output (**Note with Mermaid diagrams** or **draw.io diagram**), optionally enter a title (Claude picks one if it's empty), then click **Convert**.
+
+![The Convert images dialog](assets/step_2.png)
+
+**Step 3: get the result.** The new note or `.drawio` file opens when the conversion finishes. Here is one hand-drawn diagram converted both ways.
+
+**Original:** a hand-drawn AWS system diagram on grid paper. A user goes through Route 53 to an Edge group (CloudFront CDN, plus WAF + Shield), then to S3 static assets and a VPC. Inside the VPC, a multi-AZ load balancer sends traffic to three auto-scaling app instances, which connect to Aurora, ElastiCache and SQS. Three handwritten to-do bullets are at the bottom.
+
+![Hand-drawn system diagram on grid paper](assets/s_original.png)
+
+**Note with Mermaid diagrams:** the same image converted to an Obsidian note. The diagram is rebuilt as a Mermaid flowchart with the Edge and VPC groups, the dashed link between CloudFront and WAF, and database shapes for the data stores. The handwritten bullets become a regular Markdown list below the diagram.
+
+![Mermaid output rendered in an Obsidian note](assets/s_mermaid.png)
+
+**draw.io diagram:** the same image converted to an editable `.drawio` file, shown here in a draw.io editor inside Obsidian. The layout follows the sketch closely, including the user stick figure, the orange Edge and green VPC headers, cylinder shapes for Aurora and ElastiCache, and the bullet list as a text block.
+
+![draw.io output open in an editor inside Obsidian](assets/s_drawio.png)
+
 ## Requirements, network use and costs
 
 - **Anthropic account and API key required.** InkMagix uses Anthropic's Claude models to read your images. Create an API key at [console.anthropic.com](https://console.anthropic.com).
