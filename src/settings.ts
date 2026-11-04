@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, SettingDefinitionItem } from "obsidian";
 import type InkMagixPlugin from "./main";
 
 export type DiagramFormat = "mermaid" | "drawio";
@@ -57,207 +57,189 @@ export class InkMagixSettingTab extends PluginSettingTab {
 		super(app, plugin);
 	}
 
-	display(): void {
-		const { containerEl } = this;
+	getControlValue(key: string): unknown {
+		const value: unknown = this.plugin.settings[key as keyof InkMagixSettings];
+		return key === "maxImageEdge" ? String(value) : value;
+	}
+
+	async setControlValue(key: string, value: unknown): Promise<void> {
+		let v = value;
+		if (key === "maxImageEdge") v = parseInt(String(value), 10);
+		else if (key === "noteFolder" || key === "attachmentsFolder") v = String(value).trim();
+		(this.plugin.settings as unknown as Record<string, unknown>)[key] = v;
+		await this.plugin.saveSettings();
+		// Dependent rows use `visible`; re-evaluate them.
+		if (key === "enableDrawio" || key === "keepOriginal") this.update();
+	}
+
+	getSettingDefinitions(): SettingDefinitionItem[] {
 		const s = this.plugin.settings;
-		const save = () => this.plugin.saveSettings();
-		containerEl.empty();
+		const showCustomModel = () => this.customModelSelected || !(s.model in MODEL_OPTIONS);
 
-		const secrets = this.app.secretStorage;
-		const hasKey = !!secrets.getSecret(API_KEY_SECRET_ID);
-		const keySetting = new Setting(containerEl)
-			.setName("Anthropic API key")
-			.setDesc("Create one at console.anthropic.com. Stored in Obsidian's secret storage, not in plugin data.")
-			.addText((t) => {
-				t.inputEl.type = "password";
-				t.setPlaceholder(hasKey ? "•••••••• (saved)" : "sk-ant-...").onChange((v) => {
-					if (v.trim()) secrets.setSecret(API_KEY_SECRET_ID, v.trim());
-				});
-			});
-		if (hasKey) {
-			keySetting.addExtraButton((b) =>
-				b
-					.setIcon("trash")
-					.setTooltip("Remove saved key")
-					.onClick(() => {
-						secrets.setSecret(API_KEY_SECRET_ID, "");
-						this.display();
-					}),
-			);
-		}
-
-		const showCustom = this.customModelSelected || !(s.model in MODEL_OPTIONS);
-		new Setting(containerEl)
-			.setName("Model")
-			.setDesc("Claude model used for conversions.")
-			.addDropdown((d) => {
-				for (const [id, label] of Object.entries(MODEL_OPTIONS)) d.addOption(id, label);
-				d.addOption(CUSTOM_MODEL, "Custom…");
-				d.setValue(showCustom ? CUSTOM_MODEL : s.model).onChange(async (v) => {
-					if (v === CUSTOM_MODEL) {
-						// Keep the current model until a custom ID is typed; just reveal the field.
-						this.customModelSelected = true;
-						this.display();
-						this.customModelInput?.focus();
-						return;
-					}
-					this.customModelSelected = false;
-					s.model = v;
-					await save();
-					this.display();
-				});
-			});
-		this.customModelInput = null;
-		if (showCustom) {
-			new Setting(containerEl)
-				.setName("Custom model ID")
-				.setDesc("Exact model ID, e.g. claude-opus-5.")
-				.addText((t) => {
-					this.customModelInput = t.inputEl;
-					t.setPlaceholder("claude-…")
-						.setValue(s.model)
-						.onChange(async (v) => {
-							const id = v.trim();
-							if (!id) return; // never save an empty model
-							s.model = id;
-							await save();
+		return [
+			{
+				name: "Anthropic API key",
+				desc: "Create one at console.anthropic.com. Stored in Obsidian's secret storage, not in plugin data.",
+				aliases: ["secret", "token"],
+				render: (setting) => {
+					const secrets = this.app.secretStorage;
+					const hasKey = !!secrets.getSecret(API_KEY_SECRET_ID);
+					setting.addText((t) => {
+						t.inputEl.type = "password";
+						t.setPlaceholder(hasKey ? "•••••••• (saved)" : "sk-ant-...").onChange((v) => {
+							if (v.trim()) secrets.setSecret(API_KEY_SECRET_ID, v.trim());
 						});
-				});
-		}
-
-		new Setting(containerEl)
-			.setName("Effort")
-			.setDesc(
-				"How hard Claude thinks. Higher = more accurate transcription of messy handwriting and complex diagrams, but slower and more tokens. " +
+					});
+					if (hasKey) {
+						setting.addExtraButton((b) =>
+							b
+								.setIcon("trash")
+								.setTooltip("Remove saved key")
+								.onClick(() => {
+									secrets.setSecret(API_KEY_SECRET_ID, "");
+									this.update();
+								}),
+						);
+					}
+				},
+			},
+			{
+				name: "Model",
+				desc: "Claude model used for conversions.",
+				render: (setting) => {
+					setting.addDropdown((d) => {
+						for (const [id, label] of Object.entries(MODEL_OPTIONS)) d.addOption(id, label);
+						d.addOption(CUSTOM_MODEL, "Custom…");
+						d.setValue(showCustomModel() ? CUSTOM_MODEL : s.model).onChange(async (v) => {
+							if (v === CUSTOM_MODEL) {
+								// Keep the current model until a custom ID is typed; just reveal the field.
+								this.customModelSelected = true;
+								this.update();
+								this.customModelInput?.focus();
+								return;
+							}
+							this.customModelSelected = false;
+							s.model = v;
+							await this.plugin.saveSettings();
+							this.update();
+						});
+					});
+				},
+			},
+			{
+				name: "Custom model ID",
+				desc: "Exact model ID, e.g. claude-opus-5.",
+				visible: showCustomModel,
+				render: (setting) => {
+					setting.addText((t) => {
+						this.customModelInput = t.inputEl;
+						t.setPlaceholder("claude-…")
+							.setValue(s.model)
+							.onChange(async (v) => {
+								const id = v.trim();
+								if (!id) return; // never save an empty model
+								s.model = id;
+								await this.plugin.saveSettings();
+							});
+					});
+					return () => {
+						this.customModelInput = null;
+					};
+				},
+			},
+			{
+				name: "Effort",
+				desc:
+					"How hard Claude thinks. Higher = more accurate transcription of messy handwriting and complex diagrams, but slower and more tokens. " +
 					"Max can think for several minutes per image. Use 'Model default' for older models that don't support effort.",
-			)
-			.addDropdown((d) =>
-				d
-					.addOptions({
+				control: {
+					type: "dropdown",
+					key: "effort",
+					options: {
 						default: "Model default",
 						low: "Low",
 						medium: "Medium",
 						high: "High",
 						xhigh: "Extra high",
 						max: "Max",
-					})
-					.setValue(s.effort)
-					.onChange(async (v) => {
-						s.effort = v as Effort;
-						await save();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName("Note folder")
-			.setDesc("Where new notes and .drawio files are created. Created if missing.")
-			.addText((t) =>
-				t.setPlaceholder("InkMagix").setValue(s.noteFolder).onChange(async (v) => {
-					s.noteFolder = v.trim();
-					await save();
-				}),
-			);
-
-		new Setting(containerEl)
-			.setName("Enable draw.io output")
-			.setDesc("Show the draw.io option in the convert dialog. Off: always create a note with Mermaid diagrams.")
-			.addToggle((t) =>
-				t.setValue(s.enableDrawio).onChange(async (v) => {
-					s.enableDrawio = v;
-					await save();
-					this.display();
-				}),
-			);
-		if (s.enableDrawio) {
-			new Setting(containerEl)
-				.setName("Default diagram format")
-				.setDesc("Preselected output format in the convert dialog.")
-				.addDropdown((d) =>
-					d
-						.addOptions({ mermaid: "Note with Mermaid diagrams", drawio: "draw.io diagram" })
-						.setValue(s.defaultFormat)
-						.onChange(async (v) => {
-							s.defaultFormat = v as DiagramFormat;
-							await save();
-						}),
-				);
-		}
-
-		new Setting(containerEl)
-			.setName("Add properties")
-			.setDesc("Add created, source and model properties to new notes.")
-			.addToggle((t) =>
-				t.setValue(s.addProperties).onChange(async (v) => {
-					s.addProperties = v;
-					await save();
-				}),
-			);
-
-		new Setting(containerEl)
-			.setName("Keep original photo")
-			.setDesc("Save the original image(s) in the vault and link them from the note.")
-			.addToggle((t) =>
-				t.setValue(s.keepOriginal).onChange(async (v) => {
-					s.keepOriginal = v;
-					await save();
-					this.display();
-				}),
-			);
-		if (s.keepOriginal) {
-			new Setting(containerEl)
-				.setName("Originals folder")
-				.setDesc("Where originals are saved. Empty = '<note folder>/attachments'.")
-				.addText((t) =>
-					t
-						.setPlaceholder(attachmentsFolderOf({ ...s, attachmentsFolder: "" }))
-						.setValue(s.attachmentsFolder)
-						.onChange(async (v) => {
-							s.attachmentsFolder = v.trim();
-							await save();
-						}),
-				);
-		}
-
-		new Setting(containerEl)
-			.setName("Max output tokens")
-			.setDesc("Upper limit on the response length (thinking + output).")
-			.addText((t) => {
-				t.inputEl.type = "number";
-				t.setValue(String(s.maxOutputTokens)).onChange(async (v) => {
-					const n = parseInt(v, 10);
-					if (Number.isFinite(n) && n >= 1024) {
-						s.maxOutputTokens = n;
-						await save();
-					}
-				});
-			});
-
-		new Setting(containerEl)
-			.setName("Max image size (long edge)")
-			.setDesc(
-				"Images are downscaled to this before upload. 2576 px is the maximum current Claude models use " +
+					},
+				},
+			},
+			{
+				name: "Note folder",
+				desc: "Where new notes and .drawio files are created. Created if missing.",
+				control: { type: "text", key: "noteFolder", placeholder: "InkMagix" },
+			},
+			{
+				name: "Enable draw.io output",
+				desc: "Show the draw.io option in the convert dialog. Off: always create a note with Mermaid diagrams.",
+				control: { type: "toggle", key: "enableDrawio" },
+			},
+			{
+				name: "Default diagram format",
+				desc: "Preselected output format in the convert dialog.",
+				visible: () => s.enableDrawio,
+				control: {
+					type: "dropdown",
+					key: "defaultFormat",
+					options: { mermaid: "Note with Mermaid diagrams", drawio: "draw.io diagram" },
+				},
+			},
+			{
+				name: "Add properties",
+				desc: "Add created, source and model properties to new notes.",
+				control: { type: "toggle", key: "addProperties" },
+			},
+			{
+				name: "Keep original photo",
+				desc: "Save the original image(s) in the vault and link them from the note.",
+				control: { type: "toggle", key: "keepOriginal" },
+			},
+			{
+				name: "Originals folder",
+				desc: "Where originals are saved. Empty = '<note folder>/attachments'.",
+				visible: () => s.keepOriginal,
+				control: {
+					type: "text",
+					key: "attachmentsFolder",
+					placeholder: attachmentsFolderOf({ ...s, attachmentsFolder: "" }),
+				},
+			},
+			{
+				name: "Max output tokens",
+				desc: "Upper limit on the response length (thinking + output).",
+				control: {
+					type: "number",
+					key: "maxOutputTokens",
+					min: 1024,
+					validate: (n) => (Number.isFinite(n) && n >= 1024 ? undefined : "Must be at least 1024."),
+				},
+			},
+			{
+				name: "Max image size (long edge)",
+				desc:
+					"Images are downscaled to this before upload. 2576 px is the maximum current Claude models use " +
 					"(best for handwriting and dense diagrams, up to ~4.8K tokens/image). Lower = cheaper.",
-			)
-			.addDropdown((d) =>
-				d
-					.addOptions({ "2576": "2576 px (max detail)", "1920": "1920 px", "1568": "1568 px", "1280": "1280 px (cheapest)" })
-					.setValue(String(s.maxImageEdge))
-					.onChange(async (v) => {
-						s.maxImageEdge = parseInt(v, 10);
-						await save();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName("Default instructions")
-			.setDesc("Always added to the prompt, e.g. 'Write in English', 'Use bullet points', 'Tag with #meeting'.")
-			.addTextArea((t) => {
-				t.inputEl.rows = 5;
-				t.inputEl.addClass("inkmagix-wide");
-				t.setValue(s.defaultInstructions).onChange(async (v) => {
-					s.defaultInstructions = v;
-					await save();
-				});
-			});
+				control: {
+					type: "dropdown",
+					key: "maxImageEdge",
+					options: { "2576": "2576 px (max detail)", "1920": "1920 px", "1568": "1568 px", "1280": "1280 px (cheapest)" },
+				},
+			},
+			{
+				name: "Default instructions",
+				desc: "Always added to the prompt, e.g. 'Write in English', 'Use bullet points', 'Tag with #meeting'.",
+				render: (setting) => {
+					setting.addTextArea((t) => {
+						t.inputEl.rows = 5;
+						t.inputEl.addClass("inkmagix-wide");
+						t.setValue(s.defaultInstructions).onChange(async (v) => {
+							s.defaultInstructions = v;
+							await this.plugin.saveSettings();
+						});
+					});
+				},
+			},
+		];
 	}
 }

@@ -187,7 +187,7 @@ async function validateMermaid(md: string): Promise<string[]> {
 	if (blocks.length === 0) return [];
 	let mermaid: { parse: (code: string) => unknown };
 	try {
-		mermaid = await loadMermaid();
+		mermaid = (await loadMermaid()) as { parse: (code: string) => unknown };
 	} catch {
 		return []; // Can't validate; don't block the user.
 	}

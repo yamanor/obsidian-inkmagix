@@ -141,7 +141,13 @@ export function friendlyError(e: unknown): string {
 	return e instanceof Error ? e.message : String(e);
 }
 
-function apiMessage(e: InstanceType<typeof Anthropic.APIError>): string {
-	const err = (e.error as { error?: { message?: string } } | undefined)?.error;
-	return err?.message ?? e.message;
+function apiMessage(e: { error?: unknown; message: string }): string {
+	const body = e.error;
+	if (typeof body === "object" && body !== null && "error" in body) {
+		const inner = body.error;
+		if (typeof inner === "object" && inner !== null && "message" in inner && typeof inner.message === "string") {
+			return inner.message;
+		}
+	}
+	return e.message;
 }

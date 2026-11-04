@@ -18,7 +18,9 @@ export function fitSize(width: number, height: number, maxEdge: number, maxPixel
 export function sanitizeFileName(name: string, fallback = "Untitled"): string {
 	const cleaned = name
 		.replace(/[\\/:*?"<>|#^[\]]/g, " ")
-		.replace(/[\u0000-\u001f]/g, "")
+		.split("")
+		.filter((c) => c.charCodeAt(0) >= 0x20) // drop C0 control characters
+		.join("")
 		.replace(/\s+/g, " ")
 		.trim()
 		.replace(/^\.+/, "")

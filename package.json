@@ -1,6 +1,6 @@
 {
   "name": "obsidian-inkmagix",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Convert photos of handwriting, whiteboards and diagrams into Obsidian notes with Mermaid diagrams or draw.io files using Claude.",
   "private": true,
   "main": "main.js",
@@ -32,7 +32,6 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^5.1.0",
-    "builtin-modules": "^4.0.0",
     "esbuild": "^0.28.2",
     "jsdom": "^25.0.1",
     "obsidian": "latest",

@@ -59,7 +59,7 @@ export async function prepareImage(input: InputImage, maxEdge: number): Promise<
 	}
 
 	const { width, height } = fitSize(img.naturalWidth, img.naturalHeight, maxEdge);
-	const canvas = document.createElement("canvas");
+	const canvas = createEl("canvas");
 	canvas.width = width;
 	canvas.height = height;
 	const ctx = canvas.getContext("2d");

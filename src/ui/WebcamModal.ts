@@ -70,7 +70,7 @@ export class WebcamModal extends Modal {
 					cams.forEach((c, i) => d.addOption(c.deviceId, c.label || `Camera ${i + 1}`));
 					const current = this.stream?.getVideoTracks()[0]?.getSettings().deviceId;
 					if (current) d.setValue(current);
-					d.onChange((id) => this.start(id));
+					d.onChange((id) => void this.start(id));
 				});
 			}
 		} catch {
@@ -99,7 +99,7 @@ export class WebcamModal extends Modal {
 		const w = this.video.videoWidth;
 		const h = this.video.videoHeight;
 		if (!w || !h) return;
-		const canvas = document.createElement("canvas");
+		const canvas = createEl("canvas");
 		canvas.width = w;
 		canvas.height = h;
 		canvas.getContext("2d")?.drawImage(this.video, 0, 0, w, h);
