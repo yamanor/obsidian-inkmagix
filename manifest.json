@@ -1,7 +1,7 @@
 {
   "id": "inkmagix",
   "name": "InkMagix",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minAppVersion": "1.15.0",
   "description": "Convert photos / images of handwriting, whiteboards and diagrams into Markdown notes with Mermaid diagrams or draw.io files using Claude.",
   "author": "yamanor",
