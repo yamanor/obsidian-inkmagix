@@ -46,20 +46,24 @@ export class ConvertModal extends Modal {
 		this.renderList();
 
 		if (this.settings.enableDrawio) {
-			new Setting(this.formEl).setName("Output").addDropdown((d) =>
-				d
-					.addOptions({ mermaid: "Note with Mermaid diagrams", drawio: "draw.io diagram" })
-					.setValue(this.format)
-					.onChange((v) => (this.format = v as DiagramFormat)),
-			);
+			new Setting(this.formEl)
+				.setName("Output")
+				.addDropdown((d) =>
+					d
+						.addOptions({ mermaid: "Note with Mermaid diagrams", drawio: "draw.io diagram" })
+						.setValue(this.format)
+						.onChange((v) => (this.format = v as DiagramFormat)),
+				)
+				.setClass("inkmagix-stacked");
 		}
 		new Setting(this.formEl)
 			.setName("Title")
 			.setDesc("Optional — Claude picks one if empty.")
-			.addText((t) => t.onChange((v) => (this.title = v)));
+			.addText((t) => t.onChange((v) => (this.title = v)))
+			.setClass("inkmagix-stacked");
 
 		this.statusEl = contentEl.createDiv({ cls: "inkmagix-status" });
-		const footer = new Setting(contentEl);
+		const footer = new Setting(contentEl).setClass("inkmagix-footer");
 		footer.addButton((b) => {
 			this.cancelBtn = b.buttonEl;
 			b.setButtonText("Cancel").onClick(() => {
