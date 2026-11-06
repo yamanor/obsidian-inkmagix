@@ -5,3 +5,5 @@ data.json
 .DS_Store
 coverage/
 CLAUDE.md
+.claude
+.worktrees
