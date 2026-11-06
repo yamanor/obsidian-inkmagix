@@ -14,7 +14,7 @@
 
 .inkmagix-thumbs {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
 	gap: var(--size-4-2);
 	margin-bottom: var(--size-4-3);
 }
